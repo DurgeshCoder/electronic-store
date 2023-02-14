@@ -4,16 +4,18 @@ import { useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import UserProfileView from "../../components/users/UserProfileView"
 import UserContext from '../../context/UserContext'
-import { getUser, updateUser } from "../../services/user.service"
+import { getUser, updateProfilePic, updateUser } from "../../services/user.service"
+import defaultPicture from '../../assets/unnamed.jpg'
 const Profile = () => {
 
     const userContext = useContext(UserContext)
     const { userId } = useParams()
     const [user, setUser] = useState(null)
+    const [dynamicProfileUrl, setDynamicProfileUrl] = useState(defaultPicture)
+    const [profileFile, setProfileFile] = useState(null)
 
     // modals state 
     const [show, setShow] = useState(false);
-
     const [updateLoading, setUpdateLoading] = useState(false)
 
     const handleClose = () => setShow(false);
@@ -73,7 +75,21 @@ const Profile = () => {
         updateUser(user).then(updatedUser => {
             console.log(updatedUser)
             toast.success("User details updated !!")
-            handleClose()
+            updateProfilePic(profileFile, user.userId)
+                .then(response => {
+                    console.log("image uploaded")
+                    toast.success("Image updated !!")
+                    setUpdateLoading(false)
+                    getUserDataFromServer()
+                    handleClose()
+
+                })
+                .catch(error => {
+                    console.log(error)
+                    toast.error("Error in uploading image")
+                    setUpdateLoading(false)
+                })
+            // handleClose()
         }).
             catch(error => {
                 console.log(error)
@@ -81,12 +97,24 @@ const Profile = () => {
                 //     toast.error(error.response.data.name)
                 // }
                 toast.error("Not updated !! Error")
-            })
-            .finally(() => {
                 setUpdateLoading(false)
             })
+
     }
 
+    const handeFileChange = (event) => {
+        console.log("file changed")
+        if (event.target.files && event.target.files[0]) {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                setDynamicProfileUrl(e.target.result)
+                console.log(e.target.result)
+                setProfileFile(event.target.files[0])
+            }
+
+            reader.readAsDataURL(event.target.files[0])
+        }
+    }
 
     //update view
 
@@ -106,6 +134,24 @@ const Profile = () => {
                                 <Table className="" responsive hover  >
 
                                     <tbody>
+
+                                        {/* image update  */}
+
+                                        <tr>
+                                            <td>
+                                                Profile Image
+                                            </td>
+                                            <td>
+
+                                                <img height={200} width={200} style={{ objectFit: "cover" }} src={dynamicProfileUrl} alt="" />
+                                                <Form.Control type="file"
+                                                    className="mt-2"
+                                                    onChange={handeFileChange}
+
+
+                                                />
+                                            </td>
+                                        </tr>
                                         <tr>
                                             <td>Name</td>
                                             <td>

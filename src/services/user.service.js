@@ -24,3 +24,15 @@ export const updateUser = (user) => {
     .put(`/users/${user.userId}`, user)
     .then((response) => response.data);
 };
+
+//
+// update profile pic
+
+export const updateProfilePic = (file, userId) => {
+  const formData = new FormData();
+  formData.append("userImage", file);
+
+  return privateAxios
+    .post(`/users/image/${userId}`, formData)
+    .then((response) => response.data);
+};
