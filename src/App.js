@@ -7,7 +7,7 @@ import Cart from "./pages/Cart";
 import Dashboard from "./pages/users/Dashboard";
 import Profile from "./pages/users/Profile";
 import AboutUser from "./pages/users/AboutUser";
-import { Navbar } from "react-bootstrap";
+import { Container, Navbar } from "react-bootstrap";
 import CustomNavbar from "./components/Navbar";
 import Contact from "./pages/Contact";
 import { ToastContainer, Zoom, Flip } from "react-toastify";
@@ -28,7 +28,36 @@ import StorePage from "./pages/users/StorePage";
 import ProductView from "./pages/users/ProductView";
 import CategoryStorePage from "./pages/users/CategoryStorePage";
 import CartProvider from "./context/CartProvider";
+import Loading from "./components/Loading";
+import { useEffect, useState } from "react";
+import { privateAxios } from "./services/axios.service";
 function App() {
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    //request interceptor
+    privateAxios.interceptors.request.use(
+      (config) => {
+        setLoading(true);
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+
+    //repsonse interceptor
+    privateAxios.interceptors.response.use(
+      (config) => {
+        setLoading(false);
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+  }, []);
+
   return (
     // setting up routes
 
@@ -37,6 +66,7 @@ function App() {
         <BrowserRouter>
           <ToastContainer position="bottom-center" theme="dark" draggable />
           <CustomNavbar />
+          <Loading show={loading} />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
