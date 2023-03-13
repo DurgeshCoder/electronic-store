@@ -10,7 +10,7 @@ import AboutUser from "./pages/users/AboutUser";
 import { Container, Navbar } from "react-bootstrap";
 import CustomNavbar from "./components/Navbar";
 import Contact from "./pages/Contact";
-import { ToastContainer, Zoom, Flip } from "react-toastify";
+import { ToastContainer, Zoom, Flip, toast } from "react-toastify";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/users/Home";
@@ -31,6 +31,7 @@ import CartProvider from "./context/CartProvider";
 import Loading from "./components/Loading";
 import { useEffect, useState } from "react";
 import { privateAxios } from "./services/axios.service";
+import Swal from "sweetalert2";
 function App() {
   const [loading, setLoading] = useState(false);
 
@@ -53,6 +54,15 @@ function App() {
         return config;
       },
       (error) => {
+        setLoading(false);
+        if (error.code === "ERR_NETWORK") {
+          // toast.error("Backend Server is down ! Try Again");
+          Swal.fire({
+            title: "Network Error",
+            html: "Backend server is down",
+            icon: "info",
+          });
+        }
         return Promise.reject(error);
       }
     );
